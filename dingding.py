@@ -13,7 +13,7 @@ def msg(text):
     "msgtype": "text" ,
     "at": {
       "atMobiles": [
-        "18018336335"
+        "180xxxxxxxxx"
       ] ,
       "isAtAll": False
     } ,
