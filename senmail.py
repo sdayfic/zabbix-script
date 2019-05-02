@@ -6,7 +6,7 @@ from smtplib import SMTP_SSL
 import sys
 sent_smtp = 'smtp.163.com'
 sent_user = 'sdayfic'
-pwd = '800128aa'
+pwd = ''
 sent_mail = 'sdayfic@163.com'
 rece_mail =sys.argv[1]
 mail_title = sys.argv[2]
