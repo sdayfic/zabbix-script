@@ -53,9 +53,9 @@ unlock(){
 
 code_get() {
         write_log "code_get"
-                cd ${CODE_DIR} && echo 'git pull'
+                cd ${CODE_DIR}/$PRO_NAME &&  git pull
                 cp -r ${CODE_DIR}/${PRO_NAME} ${TMP_DIR}/
-                API_NAME="v4"
+                API_NAME=$(git show | grep commit | cut -d" " -f 2 | head -c 10)
 }
 
 code_build(){
@@ -135,7 +135,7 @@ rollback_fun(){
         fi
            for node in $NODE_LIST;do
             ssh $node "rm -f ${REMOTE_DIR}/$PRO_NAME \
-			      && ln -s ${RETMP_DIR}/$1 ${REMOTE_DIR}/$PRO_NAME"
+                              && ln -s ${RETMP_DIR}/$1 ${REMOTE_DIR}/$PRO_NAME"
            done
 }
 
@@ -146,11 +146,11 @@ rollback(){
                    echo "Usage  rollback [ list | version ]"
                    unlock
                    exit 1
-				fi
+                                fi
                 case $1 in
                         list)
-                          ls -l ${TMP_DIR} | grep "^d"
-						   ;;
+                          ls -lrt ${TMP_DIR} | grep "^d"
+                                                   ;;
                         *)
                           rollback_fun $1;
                            ;;
