@@ -1,0 +1,41 @@
+node ("192.168.1.10") {      
+
+stage('Git Checkout') {
+    checkout([$class: 'GitSCM',branches: [[name: '$Tag']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'git@192.168.1.30:/home/git/solo.git']]])
+}       
+
+
+stage('Maven Build') {
+    sh '''
+    export JAVA_HOME=/usr/local/jdk
+    /usr/local/maven/bin/mvn clean package -Dmaven.test.skip=true
+    '''
+}
+
+
+stage('Build and Puah Image') {
+    sh '''
+    docker login -u admin -p Harbor12345 www.node2.com
+    REPOSITORY=www.node2.com/project/solo:${Tag}
+    cat > Dockerfile2 <<EOF
+    FROM  www.node2.com/lzx/tomcat:latest
+    RUN rm -rf /usr/local/tomcat/webapps/ROOT
+    COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
+    CMD ["catalina.sh","run"]
+EOF
+    docker build -t $REPOSITORY -f Dockerfile2 . 
+    docker push $REPOSITORY
+    '''           
+}
+
+
+stage('Deploy to Docker') {
+    sh '''
+    REPOSITORY=www.node2.com/project/solo:${Tag}
+    docker rm -f web-demo | true
+    docker rmi -f $REPOSITORY | true
+    docker rmi -f  `docker images | awk '/<none>/{print $3}'` | true
+    docker container run -d -v /usr/local/jdk:/usr/local/jdk --name web-demo -p 88:8080 $REPOSITORY
+    '''
+}
+}
